@@ -700,8 +700,8 @@ services:
     command: '"0 0 * * * gosu sentry sentry cleanup --days $SENTRY_EVENT_RETENTION_DAYS"'
   nginx:
     <<: *restart_policy
-    ports:
-      - "$SENTRY_BIND:80/tcp"
+    # ports:
+    #   - "$SENTRY_BIND:80/tcp"
     image: "nginx:1.29.1-alpine"
     volumes:
       - type: bind
@@ -723,6 +723,13 @@ services:
       relay:
         <<: *depends_on-healthy
         restart: true
+    labels:
+      - swag=enable
+      - swag_port=80
+      - swag_url=sentry.pdouglas.net
+    networks:
+      - default
+      - torrenting_swag
   relay:
     <<: *restart_policy
     image: "$RELAY_IMAGE"
@@ -863,3 +870,8 @@ volumes:
   sentry-kafka-log:
   sentry-smtp-log:
   sentry-clickhouse-log:
+
+  
+networks:
+  torrenting_swag:
+    external: true
