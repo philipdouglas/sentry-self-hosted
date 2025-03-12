@@ -64,6 +64,8 @@ x-sentry-defaults: &sentry_defaults
     - "./sentry:/etc/sentry"
     - "./geoip:/geoip:ro"
     - "./certificates:/usr/local/share/ca-certificates:ro"
+  labels:
+    - wud.watch=false
 x-snuba-defaults: &snuba_defaults
   <<: *restart_policy
   depends_on:
@@ -88,6 +90,8 @@ x-snuba-defaults: &snuba_defaults
     # To start, state these environment variables below on your `.env.` file and adjust the options as needed.
     SNUBA_STATSD_HOST: # Example value: "100.100.123.123". Must be an IP address, not domain name
     SNUBA_STATSD_PORT: # Example value: 8125
+  labels:
+    - wud.watch=false
 services:
   smtp:
     <<: *restart_policy
@@ -105,6 +109,8 @@ services:
       <<: *healthcheck_defaults
       # From: https://stackoverflow.com/a/31877626/5155484
       test: echo stats | nc 127.0.0.1 11211
+    labels:
+      - wud.watch=false
   redis:
     <<: *restart_policy
     image: "redis:6.2.14-alpine"
@@ -122,6 +128,8 @@ services:
         soft: 10032
         hard: 10032
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    labels:
+      - wud.watch=false
   postgres:
     <<: *restart_policy
     # Using the same postgres version as Sentry dev for consistency purposes
@@ -140,6 +148,8 @@ services:
       POSTGRES_HOST_AUTH_METHOD: "trust"
     volumes:
       - "sentry-postgres:/var/lib/postgresql/data"
+    labels:
+      - wud.watch=false
   kafka:
     <<: *restart_policy
     image: "confluentinc/cp-kafka:7.6.1"
@@ -177,6 +187,8 @@ services:
       interval: 10s
       timeout: 10s
       retries: 30
+    labels:
+      - wud.watch=false
   clickhouse:
     <<: *restart_policy
     image: clickhouse-self-hosted-local
@@ -211,6 +223,8 @@ services:
       interval: 10s
       timeout: 10s
       retries: 30
+    labels:
+      - wud.watch=false
   snuba-api:
     <<: *snuba_defaults
   # Kafka consumer responsible for feeding events into Clickhouse
@@ -314,6 +328,8 @@ services:
         source: ./symbolicator
         target: /etc/symbolicator
     command: run -c /etc/symbolicator/config.yml
+    labels:
+      - wud.watch=false
   symbolicator-cleanup:
     <<: *restart_policy
     image: symbolicator-cleanup-self-hosted-local
@@ -324,6 +340,8 @@ services:
     command: '"55 23 * * * gosu symbolicator symbolicator cleanup"'
     volumes:
       - "sentry-symbolicator:/data"
+    labels:
+      - wud.watch=false
   web:
     <<: *sentry_defaults
     ulimits:
@@ -467,6 +485,7 @@ services:
       - swag=enable
       - swag_port=80
       - swag_url=sentry.pdouglas.net
+      - wud.watch=false
     networks:
       - default
       - torrenting_swag
@@ -489,6 +508,8 @@ services:
         <<: *depends_on-healthy
       web:
         <<: *depends_on-healthy
+    labels:
+      - wud.watch=false
   vroom:
     <<: *restart_policy
     image: "$VROOM_IMAGE"
@@ -504,6 +525,8 @@ services:
         <<: *depends_on-healthy
     profiles:
       - feature-complete
+    labels:
+      - wud.watch=false
   vroom-cleanup:
     <<: *restart_policy
     image: vroom-cleanup-self-hosted-local
@@ -521,6 +544,8 @@ services:
       - sentry-vroom:/var/lib/sentry-profiles
     profiles:
       - feature-complete
+    labels:
+      - wud.watch=false
 
 volumes:
   # These store application data that should persist across restarts.
@@ -552,7 +577,7 @@ volumes:
   sentry-smtp-log:
   sentry-clickhouse-log:
 
-  
+
 networks:
   torrenting_swag:
     external: true
