@@ -774,6 +774,8 @@ services:
     healthcheck:
       <<: *healthcheck_defaults
       test: ["CMD", "/bin/relay", "healthcheck"]
+    labels:
+      - wud.watch=false
   taskbroker:
     <<: *restart_policy
     image: "$TASKBROKER_IMAGE"
@@ -786,6 +788,8 @@ services:
     depends_on:
       kafka:
         <<: *depends_on-healthy
+    labels:
+      - wud.watch=false
   taskscheduler:
     <<: *sentry_defaults
     command: run taskworker-scheduler
