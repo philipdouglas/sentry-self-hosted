@@ -751,7 +751,7 @@ services:
       - wud.watch=false
     networks:
       - default
-      - torrenting_swag
+      - swag
   relay:
     <<: *restart_policy
     image: "$RELAY_IMAGE"
@@ -903,5 +903,5 @@ volumes:
 
 
 networks:
-  torrenting_swag:
+  swag:
     external: true
