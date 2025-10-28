@@ -76,6 +76,7 @@ x-sentry-defaults: &sentry_defaults
     - "./certificates:/usr/local/share/ca-certificates:ro"
   labels:
     - wud.watch=false
+    - docker-volume-backup.stop-during-backup=true
 x-snuba-defaults: &snuba_defaults
   <<: *restart_policy
   depends_on:
@@ -140,6 +141,7 @@ services:
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     labels:
       - wud.watch=false
+      - docker-volume-backup.stop-during-backup=true
   postgres:
     <<: *restart_policy
     # Using the same postgres version as Sentry dev for consistency purposes
@@ -156,6 +158,7 @@ services:
       - "sentry-postgres:/var/lib/postgresql/data"
     labels:
       - wud.watch=false
+      - docker-volume-backup.stop-during-backup=true
   pgbouncer:
     <<: *restart_policy
     image: "edoburu/pgbouncer:v1.24.1-p1"
@@ -215,6 +218,7 @@ services:
       retries: 30
     labels:
       - wud.watch=false
+      - docker-volume-backup.stop-during-backup=true
   clickhouse:
     <<: [*restart_policy, *pull_policy]
     image: clickhouse-self-hosted-local
@@ -255,6 +259,7 @@ services:
       retries: 30
     labels:
       - wud.watch=false
+      - docker-volume-backup.stop-during-backup=true
   seaweedfs:
     <<: *restart_policy
     image: "chrislusf/seaweedfs:3.96_large_disk"
@@ -296,6 +301,7 @@ services:
       start_period: 60s
     labels:
       - wud.watch=false
+      - docker-volume-backup.stop-during-backup=true
   snuba-api:
     <<: *snuba_defaults
     healthcheck:
@@ -507,6 +513,7 @@ services:
     command: run -c /etc/symbolicator/config.yml
     labels:
       - wud.watch=false
+      - docker-volume-backup.stop-during-backup=true
   symbolicator-cleanup:
     <<: [*restart_policy, *pull_policy]
     image: symbolicator-cleanup-self-hosted-local
@@ -519,6 +526,7 @@ services:
       - "sentry-symbolicator:/data"
     labels:
       - wud.watch=false
+      - docker-volume-backup.stop-during-backup=true
   web:
     <<: *sentry_defaults
     ulimits:
@@ -790,6 +798,7 @@ services:
         <<: *depends_on-healthy
     labels:
       - wud.watch=false
+      - docker-volume-backup.stop-during-backup=true
   taskscheduler:
     <<: *sentry_defaults
     command: run taskworker-scheduler
@@ -823,6 +832,7 @@ services:
       - feature-complete
     labels:
       - wud.watch=false
+      - docker-volume-backup.stop-during-backup=true
   vroom-cleanup:
     <<: [*restart_policy, *pull_policy]
     image: vroom-cleanup-self-hosted-local
@@ -842,6 +852,7 @@ services:
       - feature-complete
     labels:
       - wud.watch=false
+      - docker-volume-backup.stop-during-backup=true
   uptime-checker:
     <<: *restart_policy
     image: "$UPTIME_CHECKER_IMAGE"
@@ -864,6 +875,9 @@ services:
         <<: *depends_on-healthy
     profiles:
       - feature-complete
+    labels:
+      - wud.watch=false
+      - docker-volume-backup.stop-during-backup=true
 
 volumes:
   # These store application data that should persist across restarts.
